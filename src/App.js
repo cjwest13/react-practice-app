@@ -5,64 +5,101 @@ import Person from './Person/Person';
 class App extends Component {
   state = {
     persons: [
-      {name: 'Max', age :28},
-      {name: 'CJ', age: 25},
-      {name: 'Anna', age: 26}
+      {id: 'jaskd', name: 'Max', age :28},
+      {id: 'wqjnq', name: 'CJ', age: 25},
+      {id: '2131', name: 'Anna', age: 26}
     ],
-    otherState: 'some other value'
-  }
+    otherState: 'some other value',
+    showPersons: false
+  };
 
-  switchNameHandler = (newName) => {
-    //console.log('Was clicked!');
-    //DONT DO THIS this.state.persons[0].name = 'Clifton';
-    this.setState({
-      persons: [
-		    {name: 'Max', age :28},
-		    {name: newName, age: 25},
-		    {name: 'Anna', age: 26}
-	    ]
-    } )
-  }
+  nameChangedHandler = (event, id) => {
+      const personIndex = this.state.persons.findIndex(p => {
+          return p.id === id;
+      });
 
-  nameChangedHandler = (event) => {
-	  this.setState({
-		  persons: [
-			  {name: 'Max', age :28},
-			  {name: event.target.value, age: 25},
-			  {name: 'Anna', age: 26}
-		  ]
-	  } )
-  }
+      const person = {
+          ...this.state.persons[personIndex]
+      };
+
+      person.name = event.target.value;
+      const persons = [...this.state.persons];
+      persons[personIndex] = person;
+
+	  this.setState( {persons: persons });
+  };
+
+  deletePersonHandler = (personIndex) => {
+      //both makes copies of the state persons array
+      //const persons = this.state.persons.slice();
+      //spreads out array items to a list
+      const persons = [...this.state.persons];
+      persons.splice(personIndex, 1);
+      this.setState({persons: persons});
+
+  };
+
+    /**
+     * A function that determines that if the
+     * showPersons variable is true/false in the state,
+     * then set the showPersons variable using the setState syntax
+     * to the opposite of doesShow local variable
+     */
+  togglePersonsHandler = () => {
+      const doesShow = this.state.showPersons;
+      this.setState({showPersons: !doesShow});
+  };
 
   render() {
+    //Inline styling
     const style = {
-      backgroundColor: 'white',
+      backgroundColor: 'blue',
+      color: 'white',
       font: 'inherit',
       border: '1x solid blue',
       padding: '8px',
       cursor: 'pointer'
-
     };
+
+    //Prefer way of outputing condition content
+    let persons = null;
+    if (this.state.showPersons) {
+        persons = (
+            <div>
+                {this.state.persons.map((person, index) => {
+                    return <Person
+                        click={() => this.deletePersonHandler(index)}
+                        name={person.name}
+                        age={person.age}
+                        key={person.id}
+                        changed={(event) => this.nameChangedHandler(event, person.id)}
+                    />
+                })}
+            </div>
+        );
+        //Changing background of color
+        style.backgroundColor ='red';
+    }
+
+    //representing classes in the App.css file
+    //dynamically adding and assigning css classes
+    let classes = [];
+    if (this.state.persons.length <= 2) {
+      classes.push('red'); //classes =['red']
+    }
+    if (this.state.persons.length <= 1) {
+      classes.push('bold'); // classes = ['red'. 'bold']
+    }
 
 
     return (
       <div className="App">
-        <h1>Hi, I'm a React App</h1>
-          <p>This is really working!</p>
+        <h1>Hi I'm a React App</h1>
+          <p className={classes.join(' ')}>This is really working!</p>
           <button
             style={style}
-            onClick={() => this.switchNameHandler('CliftonOMG')}>Switch Name</button>
-          <Person
-            name={this.state.persons[0].name}
-            age={this.state.persons[0].age} />
-          <Person
-            name={this.state.persons[1].name}
-            age={this.state.persons[1].age}
-            click={this.switchNameHandler.bind(this,'Clifton!!!')}
-            changed={this.nameChangedHandler}> My hobbies Racing! </Person>
-          <Person
-            name={this.state.persons[2].name}
-                  age={this.state.persons[2].age}/>
+            onClick={this.togglePersonsHandler}>Toggle Persons</button>
+            {persons}
       </div>
     );
       // return React.createElement('div',{className: 'App'}, React.createElement('h1', null,'Does this work now?'));
